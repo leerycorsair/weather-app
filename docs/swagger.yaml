@@ -1,0 +1,338 @@
+definitions:
+  internal_handler.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  internal_handler.GetCitiesResponse:
+    properties:
+      cities:
+        items:
+          $ref: '#/definitions/weather-app_internal_models.City'
+        type: array
+    type: object
+  internal_handler.GetDetailedForecastResponse:
+    properties:
+      city:
+        type: string
+      forecasts:
+        items:
+          $ref: '#/definitions/weather-app_internal_models.Forecast'
+        type: array
+    type: object
+  internal_handler.GetFavoritesResponse:
+    properties:
+      cities:
+        items:
+          $ref: '#/definitions/weather-app_internal_models.City'
+        type: array
+    type: object
+  internal_handler.GetShortForecastResponse:
+    properties:
+      forecast:
+        $ref: '#/definitions/weather-app_internal_models.ForecastSummary'
+    type: object
+  internal_handler.SignInUserResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  internal_handler.SignUpUserResponse:
+    properties:
+      id:
+        type: integer
+    type: object
+  weather-app_internal_dto.DTOSignIn:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  weather-app_internal_dto.DTOSignUp:
+    properties:
+      email:
+        type: string
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  weather-app_internal_models.City:
+    description: City model
+    properties:
+      country:
+        description: '@Description Country name'
+        type: string
+      id:
+        description: '@Description City ID'
+        type: integer
+      latitude:
+        description: '@Description Latitude of the city'
+        type: number
+      longitude:
+        description: '@Description Longitude of the city'
+        type: number
+      name:
+        description: '@Description City name'
+        type: string
+    type: object
+  weather-app_internal_models.Forecast:
+    description: Weather forecast model
+    properties:
+      city_id:
+        description: '@Description City ID'
+        type: integer
+      date:
+        description: '@Description Date of the forecast'
+        type: string
+      forecast_json:
+        description: '@Description Raw JSON of the forecast details'
+        items:
+          type: integer
+        type: array
+      id:
+        description: '@Description Forecast ID'
+        type: integer
+      temp:
+        description: '@Description Temperature'
+        type: number
+    type: object
+  weather-app_internal_models.ForecastSummary:
+    description: Weather forecast summary
+    properties:
+      available_dates:
+        description: '@Description Available dates for forecasts'
+        items:
+          type: string
+        type: array
+      avg_temp:
+        description: '@Description Average Temperature'
+        type: number
+      city:
+        description: '@Description City'
+        type: string
+      country:
+        description: '@Description Country'
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  title: WebApp API
+  version: "1.0"
+paths:
+  /api/cities:
+    get:
+      description: Get the list of cities
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.GetCitiesResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Get cities
+      tags:
+      - cities
+  /api/forecast/detailed/{city_id}:
+    get:
+      description: Get the detailed forecast for a specific city on a specific date
+      parameters:
+      - description: City ID
+        in: path
+        name: city_id
+        required: true
+        type: integer
+      - description: Date
+        format: date
+        in: query
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.GetDetailedForecastResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Get detailed forecast
+      tags:
+      - forecast
+  /api/forecast/short/{city_id}:
+    get:
+      description: Get the short forecast for a specific city
+      parameters:
+      - description: City ID
+        in: path
+        name: city_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.GetShortForecastResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Get short forecast
+      tags:
+      - forecast
+  /api/users/favorites:
+    delete:
+      description: Removes a city from the user's list of favorite cities
+      parameters:
+      - description: City ID
+        in: query
+        name: cityId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete favorite city
+      tags:
+      - favorites
+    get:
+      description: Retrieves the list of favorite cities for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.GetFavoritesResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get favorite cities
+      tags:
+      - favorites
+    post:
+      description: Adds a city to the user's list of favorite cities
+      parameters:
+      - description: City ID
+        in: query
+        name: cityId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Add favorite city
+      tags:
+      - favorites
+  /auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns a JWT token
+      parameters:
+      - description: Sign in info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/weather-app_internal_dto.DTOSignIn'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.SignInUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Sign in user
+      tags:
+      - auth
+  /auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user with login, password, and email
+      parameters:
+      - description: Sign up info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/weather-app_internal_dto.DTOSignUp'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_handler.SignUpUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internal_handler.ErrorResponse'
+      summary: Sign up user
+      tags:
+      - auth
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
