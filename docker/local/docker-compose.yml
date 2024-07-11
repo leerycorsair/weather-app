@@ -1,0 +1,73 @@
+version: "3.9"
+
+services:
+  server: 
+    container_name: server
+    build:
+      context: ../..
+      dockerfile: ./docker/base/Dockerfile
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    networks:
+      - custom-network
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PSWD: ${DB_PSWD}
+      DB_NAME: ${DB_NAME}
+      DB_SSLMODE: ${DB_SSLMODE}
+      SERVER_PORT: ${SERVER_PORT}
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+      FLAGS: ${FLAGS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    
+
+  postgres:
+    container_name: postgres
+    image: "postgres:alpine"
+    expose:
+      - ${DB_PORT}
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PSWD}
+      POSTGRES_DB: ${DB_NAME}
+    restart: unless-stopped
+    networks:
+      - custom-network
+    healthcheck:
+      test: pg_isready --dbname=$DB_NAME --username=$DB_USER
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  migrations:
+    container_name: migrations
+    build:
+      context: ../..
+      dockerfile: ./docker/base/Dockerfile.migrations
+    networks:
+      - custom-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      USER: ${DB_USER}
+      PSWD: ${DB_PSWD}
+      HOST: ${DB_HOST}:${DB_PORT}
+      DB: ${DB_NAME}
+      SSLMODE: ${DB_SSLMODE}
+
+networks:
+  custom-network:
+
+volumes:
+  postgres-data:

@@ -1,0 +1,6 @@
+FROM migrate/migrate
+
+COPY ./db/migrations /db
+
+ENTRYPOINT []
+CMD migrate -path /db -database postgres://$USER:$PSWD@$HOST/$DB?sslmode=$SSLMODE up
