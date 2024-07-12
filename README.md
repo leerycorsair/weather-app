@@ -48,4 +48,6 @@ git clone https://github.com/leerycorsair/weather-app.git
 4. Выполнить команду make run.
 
 5. Swagger-документация будет доступна на localhost'е и соответствующем порте.
+
+Видео демонстрация доступна по ссылке https://youtu.be/_S-nRVv5BWo.
    
